@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS users (id varchar(40) PRIMARY KEY, username varchar(70) UNIQUE, password varchar(70) NOT NULL, phone varchar(12), email varchar(40));
+sqlite> CREATE TABLE IF NOT EXISTS usersession (sessionId varchar(50) PRIMARY KEY, access int(10), userdata text);

@@ -60,7 +60,9 @@ trait RESTAPIs extends APIRoutes
                 complete(StatusCodes.BadRequest, "Invalid username or password")
               else
               {
-
+                val userSession = UserMgmtQueryManager.checkSessionWithUserName(name).getOrElse("")
+                if(userSession != "")
+                  UserMgmtQueryManager.deleteSession(userSession)
                 val sessionId = Utils.constructRandomKey(20)
                 saveSession(sessionId, name)
                 setCookie(HttpCookie("session", value = sessionId, path = Option("/login"), httpOnly = true))

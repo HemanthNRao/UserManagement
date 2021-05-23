@@ -2,6 +2,7 @@ package org.RAO.userManagement
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives.{handleExceptions, handleRejections}
 import com.typesafe.config.ConfigFactory
 import org.RAO.userManagement.routes.RESTAPIs
 import org.slf4j.LoggerFactory
@@ -34,9 +35,11 @@ object APIServer extends App with RESTAPIs
 
   implicit val system = ActorSystem("FundMgrAPI", ConfigFactory.load(extraConfig))
   implicit val executor = system.dispatcher
-  val route=
+  val route= {
+    (handleRejections(serverRejectionHandler) & handleExceptions(serverExceptionHandler))
   {
     userRoute
+  }
   }
   val bindingFuture = Http().bindAndHandle(route, ConfigManager.get("http.interface"), ConfigManager.get("http.port").toInt)
   log.info(s"Metadata server online at http://${ConfigManager.get("http.interface")}:${ConfigManager.get("http.port")}/")

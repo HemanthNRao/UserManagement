@@ -9,7 +9,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import org.RAO.userManagement.DAL.UserMgmtQueryManager
 import org.RAO.userManagement.exceptions.MissingParams
-import org.RAO.userManagement.utils.{Json, Utils}
+import org.RAO.userManagement.utils.{ErrorConstants, Json, Utils}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -60,6 +60,7 @@ trait RESTAPIs extends APIRoutes
                 complete(StatusCodes.BadRequest, "Invalid username or password")
               else
               {
+
                 val sessionId = Utils.constructRandomKey(20)
                 saveSession(sessionId, name)
                 setCookie(HttpCookie("session", value = sessionId, path = Option("/login"), httpOnly = true))
@@ -88,6 +89,22 @@ trait RESTAPIs extends APIRoutes
           complete(Json.Value(Map("sessionId"->sessionId)).write)
         else
           complete(Json.Value(Map("sessionId"->"")).write)
+    } ~
+    (path("logout") & post & optionalHeaderValueByName("session"))
+    {
+      sessionId =>
+      {
+        val id = sessionId.getOrElse("")
+        validate(validateSession(id),ErrorConstants.INVALID_SESSION_ID)
+        {
+          println(sessionId.getOrElse(""))
+          UserMgmtQueryManager.deleteSession(sessionId.getOrElse(""))
+          deleteCookie(HttpCookie("session", "")) {
+            complete("logout successfully")
+            //        redirect("http://localhost:8181/user/login", StatusCodes.TemporaryRedirect)
+          }
+        }
+      }
     }
   }
   private def saveSession(id:String, name: String)=
@@ -122,5 +139,17 @@ trait RESTAPIs extends APIRoutes
         map += (keyName -> value)
       }
       .map(_.toMap)
+  }
+
+  /**
+   * Function validates given session id exists or not
+   * @param id
+   * @return
+   */
+  def validateSession(id:String)=
+  {
+    println(id)
+    val res = UserMgmtQueryManager.checkSession(id).getOrElse(0)
+    if(res==0) false else true
   }
 }

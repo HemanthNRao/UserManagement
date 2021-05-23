@@ -23,7 +23,7 @@ trait APIRoutes
     {
       error match
       {
-        case ErrorConstants.DATE_ALREADY_EXISTS => ErrorInfo(400, StatusCodes.BadRequest, "InputError")
+        case ErrorConstants.INVALID_SESSION_ID => ErrorInfo(400, StatusCodes.BadRequest, "InputError")
       }
     }
     val err=errorDecoder(error)

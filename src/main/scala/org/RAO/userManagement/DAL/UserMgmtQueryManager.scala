@@ -20,4 +20,10 @@ object UserMgmtQueryManager extends QueryManager
   def checkSession(id:String) = {
     db.queryWithSingleResult[Int]("select count(*) from usersession where sessionId=?", Array(id))
   }
+
+  def deleteSession(id:String): Unit =
+  {
+    db.queyWithNoResult("delete from usersession where sessionId=?", Array(id))
+  }
+
 }

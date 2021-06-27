@@ -25,6 +25,12 @@ object UserMgmtQueryManager extends QueryManager
   {
     db.queryWithSingleResult[String]("select sessionId from usersession where userdata=?", Array(name))
   }
+
+  def updateSessionTime(id: String, time: Int)=
+  {
+    db.queyWithNoResult("update usersession set access = ? where sessionId=?", Array(time,id))
+  }
+
   def deleteSession(id:String): Unit =
   {
     db.queyWithNoResult("delete from usersession where sessionId=?", Array(id))

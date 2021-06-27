@@ -62,16 +62,26 @@ trait RESTAPIs extends APIRoutes
               {
                 val userSession = UserMgmtQueryManager.checkSessionWithUserName(name).getOrElse("")
                 if(userSession != "")
-                  UserMgmtQueryManager.deleteSession(userSession)
-                val sessionId = Utils.constructRandomKey(20)
-                saveSession(sessionId, name)
-                setCookie(HttpCookie("session", value = sessionId, path = Option("/login"), httpOnly = true))
                 {
-                  val headers = List(RawHeader("session", sessionId))
-                  respondWithHeaders(headers)
-                  {
-                    complete("login successfull")
-                    //                    redirect("http://localhost:8080/user/register", StatusCodes.TemporaryRedirect)
+                  UserMgmtQueryManager.updateSessionTime(userSession, System.currentTimeMillis.toInt)
+                  setCookie(HttpCookie("session", value = userSession, path = Option("/login"), httpOnly = true)) {
+                    val headers = List(RawHeader("session", userSession))
+                    respondWithHeaders(headers) {
+                      complete("login successfull")
+                      //                    redirect("http://localhost:8080/user/register", StatusCodes.TemporaryRedirect)
+                    }
+                  }
+                }
+                else
+                {
+                  val sessionId = Utils.constructRandomKey(20)
+                  saveSession(sessionId, name)
+                  setCookie(HttpCookie("session", value = sessionId, path = Option("/login"), httpOnly = true)) {
+                    val headers = List(RawHeader("session", sessionId))
+                    respondWithHeaders(headers) {
+                      complete("login successfull")
+                      //                    redirect("http://localhost:8080/user/register", StatusCodes.TemporaryRedirect)
+                    }
                   }
                 }
               }
